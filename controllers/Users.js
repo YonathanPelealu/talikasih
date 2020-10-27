@@ -1,4 +1,4 @@
-const {Users} = require('../models')
+const {Users, Campaigns} = require('../models')
 const {decryptPwd} = require('../helpers/bcrypt')
 const {tokenGenerator} = require('../helpers/jwt')
 
@@ -67,13 +67,22 @@ class userController{
     }
 
     static async deleteUser(req,res,next){
-        const {id} = req.userData;
+        const {id, role} = req.userData;
         try{
-            const boom = await Users.destroy({where: {id}})
-            if(boom){
-                res.status(200).json({msg: "Deleted"})
-            }else{
-                next({message: "Delete failed"})
+            if (role === "Admin" || "admin") {
+                const boom = await Users.destroy({where: {id}})
+                const pendingCampaign = await Campaigns.update({where: {
+
+                }})
+                if(boom){
+                    res.status(200).json({msg: "Deleted"})
+                }else{
+                    next({message: "Delete failed"})
+                }    
+            } else {
+                res.Status(403).json({
+                    msg: "you are not authorized"
+                })
             }
         }catch(err){
             next(err)

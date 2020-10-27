@@ -57,7 +57,11 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     photo: DataTypes.STRING,
-    role: DataTypes.STRING
+    role: DataTypes.STRING,
+    status : {
+      type: DataTypes.STRING,
+      defaultValue: "active"
+    }
   }, {
     hooks: {
       beforeCreate(Users){

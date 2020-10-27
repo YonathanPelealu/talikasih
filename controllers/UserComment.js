@@ -11,7 +11,7 @@ class CommentController {
                     Campaigns,Users
                 ]
             })
-            res.status(200).json(comments)
+            res.status(200).json(comments)        
         } catch(err){
             next(err)
         }
@@ -21,26 +21,33 @@ class CommentController {
         const CampaignId = req.params.id
         const { content,date } = req.body
         try {
-            const add = await UserComments.create({
-                UserId,CampaignId,content,date
-            })
-            if (add) {
-                const campaign = await Campaigns.findOne({
-                    where: {
-                        id : CampaignId
-                    }
+            if (status === 'banned') {
+                res.status(403).json({
+                    status: 403,
+                    msg: "You're banned, please contact administrator to resolve the issue"
                 })
-
-                const PrevPoint = Number(campaign.point)
-                const addPoint = PrevPoint +1
-                const point = Campaigns.update({
-                    point : addPoint},{
-                    where: {
-                        id : CampaignId
-                    }
+            } else {
+                const add = await UserComments.create({
+                    UserId,CampaignId,content,date
                 })
+                if (add) {
+                    const campaign = await Campaigns.findOne({
+                        where: {
+                            id : CampaignId
+                        }
+                    })
+    
+                    const PrevPoint = Number(campaign.point)
+                    const addPoint = PrevPoint +1
+                    const point = Campaigns.update({
+                        point : addPoint},{
+                        where: {
+                            id : CampaignId
+                        }
+                    })
+                }
+                res.status(201).json(add)
             }
-            res.status(201).json(add)
         } catch(err) {
             next(err)
         }

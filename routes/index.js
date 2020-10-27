@@ -38,4 +38,8 @@ router.get('/discover/all/:page', campaignController.getAllCampaign);
 router.get('/discover/category/:page', campaignController.getByCategory);
 router.get('/discover/search/:page', campaignController.getBySearch);
 
+//admin routing
+const adminRoutes = require('./admin')
+router.use('/admin',adminRoutes); 
+
 exports.router = router;

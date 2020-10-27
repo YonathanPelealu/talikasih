@@ -44,5 +44,21 @@ const authoCampaign = (req,res,next) => {
         res.status(500).json(err)
     })
 }
-
+// const CampaignStatus = ( req,res,next) => {
+//     const role = req.userData.role
+//     const CampaignId  = req.params.id
+//     try {
+//         if (role === "Admin" || "admin") {
+//             next()
+//         } else {
+//             res.status.json({
+//                 Status : "403 - Forbidden",
+//                 Success : false,
+//                 msg: "You are not authorized to perform this action"
+//             })
+//         }
+//     } catch (err){
+//         next(err)
+//     }
+// }
 module.exports = {authentication, authoCampaign};

@@ -262,7 +262,7 @@ class campaignController {
         } catch (err) {
             next(err)
         }
-    }
+    }   
 }
 
 module.exports = campaignController;

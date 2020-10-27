@@ -70,50 +70,61 @@ class UserDonationController {
     }
     // user donation tanpa validasi
     static async _donate (req,res,next) {
-        const UserId = req.userData.id;
+        const {UserId, status} = req.userData;
         const CampaignId = req.params.id
         const { amount, share, comment} = req.body
         try {
-            const validCampaign = await Campaigns.findOne({
-                where : {
-                    id : CampaignId
+            if (status === 'banned') {
+                res.status(403).json({
+                    status: 403,
+                    msg: "You're banned, please contact your administrator to resolve the issue"
+                })
+            } else {
+                const validCampaign = await Campaigns.findOne({
+                    where : {
+                        id : CampaignId
+                    }
+                })
+                if (validCampaign){
+                    const approved = validCampaign.status == 'approved'
+                    if (approved) {
+                        const add = await UserDonations.create({
+                            UserId,
+                            CampaignId,
+                            amount,
+                            share,
+                            comment
+                        })
+                        //Menambahkan amount ke campaign.raised
+                        const raisedBefore = Number(validCampaign.raised);
+                        const raisedAfter = raisedBefore + Number(amount);
+                        const PrevPoint = Number(validCampaign.point);
+                        const updatePoint = PrevPoint+2
+                        const addRaised = await Campaigns.update({
+                            raised: raisedAfter,
+                            point: updatePoint},{
+                            where: {
+                                id : CampaignId
+                            }
+                        })
+                        res.status(400).json({
+                            Success : true,
+                            message : `Thank you for donating Rp. ${amount} for this campaign`,
+                            data : add
+                        }) 
+                    } else {
+                        res.status(403).json({
+                            status: 'error',
+                            msg: 'Campaign not yet approved by Admin, you can only donate on approved Csmpaign'
+                        })
+                    }
+                }else {
+                    res.status(404).json({
+                        Success : false,
+                        message: "Campaign not Found"
+                    })
                 }
-            })
-            if (validCampaign){
-                const add = await UserDonations.create({
-                    UserId,
-                    CampaignId,
-                    amount,
-                    share,
-                    comment
-                })
-                //Menambahkan amount ke campaign.raised
-                const raisedData = await Campaigns.findOne({
-                    where: {
-                        id : CampaignId
-                    }
-                })
-                const raisedBefore = Number(raisedData.raised);
-                const raisedAfter = raisedBefore + Number(amount);
-                const PrevPoint = Number(raisedData.point);
-                const updatePoint = PrevPoint+2
-                const addRaised = await Campaigns.update({
-                    raised: raisedAfter,
-                    point: updatePoint},{
-                    where: {
-                        id : CampaignId
-                    }
-                })
-                res.status(400).json({
-                    Success : true,
-                    message : `Thank you for donating Rp. ${amount} for this campaign`,
-                    data : add
-                })
-            }else {
-                res.status(404).json({
-                    Success : false,
-                    message: "Campaign not Found"
-                })
+    
             }
         } catch (err) {
             next(err)

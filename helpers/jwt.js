@@ -5,7 +5,8 @@ const tokenGenerator = (user) => {
     return jwt.sign({
         id: user.id,
         name: user.name,
-        role: user.role
+        role: user.role,
+        status: user.status
     },secretKey)
 }
 
